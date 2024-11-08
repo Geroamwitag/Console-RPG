@@ -1,6 +1,6 @@
 ﻿using RPGGame;
 using System;
-
+using System.IO;
 
 class Program
 {
@@ -12,7 +12,13 @@ class Program
 
         Run(Option);
 
-        
+        // testing
+        // Console.Clear();
+        // List<Weapon> all_weapons = GetWeapons(); 
+        // Character testChar = new Character("TestNigga", 100, 150, 0, 0);
+        // testChar.EquipWeapon(all_weapons[0]);
+        // DisplayCharacterStats(testChar);
+        // SaveCharacterData(testChar, 0);
         
     }
     
@@ -108,7 +114,8 @@ class Program
         Character player = new Character(CharName, baseHealth, Atk, Def, SP);
 
         // starting equipment
-        Weapon startingWeapon = StartingWeapon();
+        List<Weapon> WeaponList = GetWeapons();
+        Weapon startingWeapon = StartingWeapon(WeaponList);
 
         // equpi starting equipment
         player.EquipWeapon(startingWeapon);
@@ -130,55 +137,6 @@ class Program
                     --             
                     """
                 );
-    }
-
-    static Weapon StartingWeapon() {
-        Console.Clear();
-        // starting weapon options and data
-        List<string> weapons = new List<string> {
-            "Barefists", 
-            "Short Sword", 
-            "Great Sword"
-            };
-        List<string> weaponsDescriptions = new List<string> {
-            "Pure masculin fists",
-            "A basic short sword",
-            "A basic great sword"
-        };
-        List<int> weaponAtks = new List<int> {
-            0,
-            5,
-            10
-        };
-
-        Console.WriteLine(
-            $"""
-            === Starting equpiment ===
-            1- Barefists  :  Pure masculin fists, Atk = 0
-            2- Short Sword:  A basic short sword, Atk = 5
-            3- Great Sword:  A basic great sword, Atk = 10
-            """
-        );
-        
-        // select a weapon
-        Console.Write("Select a starting weapon: ");
-        string? option = Console.ReadLine();
-        bool intbool = CheckIntInput(option, 3, 1);
-
-        if (intbool) {
-            int intOption = Convert.ToInt32(option);
-            int weaponIDNX = intOption - 1;
-            Weapon startingWeapon = new Weapon(weapons[weaponIDNX], weaponsDescriptions[weaponIDNX], "Common", weaponAtks[weaponIDNX]);
-            Console.Clear();
-            Console.WriteLine($"Starting weapon selected: {startingWeapon.GetName()}\npress Enter to continue");
-            Console.ReadKey();
-            Console.Clear();
-            return startingWeapon;
-        }
-        Console.Clear();
-        return StartingWeapon();
-
-        
     }
 
     static Stats AllocateStats(int availableStatPoints) {
@@ -308,9 +266,77 @@ class Program
             return false;
         }
     }
+    
+    // weapon methods
+   static List<Weapon> GetWeapons() {
+        // define weapon objects
+        Weapon BareFists = new Weapon("Bare Fists", "Pure masculin fists", "common", 0);
+        Weapon ShotSword = new Weapon("Short Sword", "A basic short sword", "common", 5);
+        Weapon GreatSword = new Weapon("Great Sword", "A basic great sword", "common", 10);
+
+        // add weapon objects to weapon list
+        List<Weapon> weaponList = new List<Weapon> {
+            BareFists,
+            ShotSword,
+            GreatSword
+            };
+
+        return weaponList;
+        
+   }
+
+    static Weapon StartingWeapon(List<Weapon> weaponsList) {
+    Console.Clear();
+
+    Console.WriteLine(
+        $"""
+        === Starting equpiment ===
+        1- Barefists  :  Pure masculin fists, Atk = 0
+        2- Short Sword:  A basic short sword, Atk = 5
+        3- Great Sword:  A basic great sword, Atk = 10
+        """
+    );
+    
+    // select a weapon
+    Console.Write("Select a starting weapon: ");
+    string? option = Console.ReadLine();
+    bool intbool = CheckIntInput(option, 3, 1);
+
+    if (intbool) {
+        int intOption = Convert.ToInt32(option);
+        int weaponIDNX = intOption - 1;
+        Weapon startingWeapon = weaponsList[weaponIDNX];
+        Console.Clear();
+        Console.WriteLine($"Starting weapon selected: {startingWeapon.GetName()}\npress Enter to continue");
+        Console.ReadKey();
+        Console.Clear();
+        return startingWeapon;
+    }
+    Console.Clear();
+    return StartingWeapon(weaponsList);
+
+    
 }
 
-// Character stats class
+    static void SaveCharacterData(Character character, int saveslot) {
+        string save_path = $"saveslot_{saveslot}.txt";
+
+        // write data to text file
+        using (StreamWriter writer = new StreamWriter(save_path, append: false))
+        {
+            writer.WriteLine(character.Name);
+            writer.WriteLine(character.EquipedWeapon.GetName());
+            writer.WriteLine(character.Atk);
+            writer.WriteLine(character.Def);
+            writer.WriteLine(character.SkillPoints);
+        }
+
+        // success message
+        Console.WriteLine("Save Complete.");
+    }
+}
+
+// generic classes
 class Stats {
     public int Atk { get; set; }
     public int Def { get; set; }

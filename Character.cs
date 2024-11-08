@@ -7,6 +7,7 @@ namespace RPGGame {
         // Character specific properties
         public Inventory CharacterInventory         { get; set; }
         public int SkillPoints                      { get; set; }
+        public int ExpPoints                        { get; set; }
         public Weapon EquipedWeapon                 { get; set; }
         private Weapon Barefists =                  new Weapon("Barefists", "pure masculin fists", "Common", 0);
 
@@ -16,6 +17,7 @@ namespace RPGGame {
             CharacterInventory = new Inventory();
             EquipedWeapon = Barefists;
             SkillPoints = skillpoints;
+            ExpPoints = 0;
         }
 
         // Character specific Methods
