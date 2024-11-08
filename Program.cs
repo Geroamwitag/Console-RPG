@@ -4,20 +4,21 @@ using System.IO;
 
 class Program
 {
-    static void Main(string[] args)
-    {
+    static void Main(string[] args) {
 
         // start game
         int Option = ShowMainMenu();
+
 
         Run(Option);
 
         // testing
         // Console.Clear();
+        // ShowLoadData();
         // List<Weapon> all_weapons = GetWeapons(); 
-        // Character testChar = new Character("TestNigga", 100, 150, 0, 0);
+        // Character testChar = LoadCharacterData("./saves/saveslot_0.txt");
         // testChar.EquipWeapon(all_weapons[0]);
-        // DisplayCharacterStats(testChar);
+        
         // SaveCharacterData(testChar, 0);
         
     }
@@ -73,7 +74,10 @@ class Program
 
             // load saved game 
             case 2:
-                Console.WriteLine("You chose option 2");
+                int saveSlot = ShowLoadData();
+                Character character = LoadCharacterData($"./saves/saveslot_{saveSlot}.txt");
+                Console.Clear();
+                DisplayCharacterStats(character);
                 break;
             
             // open options menu
@@ -89,6 +93,35 @@ class Program
             default:
                 Console.WriteLine("Invalid choice");
                 break;
+        }
+    }
+
+    static int ShowLoadData() {
+        // clear ui
+        Console.Clear();
+
+        // get savefiles
+        string saveDirectory = "saves"; // Change this to your actual save directory path
+        string[] saveFiles = Directory.GetFiles(saveDirectory, "*.txt");
+
+        // displays all availabe save files
+        for (int i = 0; i < saveFiles.Length; i++) {
+            string filePath = saveFiles[i];
+            string playerName = File.ReadLines(filePath).First(); // Reads the first line of the file
+
+            Console.WriteLine($"({i}) {playerName}");
+        }
+
+        // has the player select a file number
+        Console.Write($"Select a save to load: ");
+        string strinput = Console.ReadLine();
+        bool intable = CheckIntInput(strinput, saveFiles.Length-1, 0);
+        if (intable) {
+            int option = int.Parse(strinput);
+            return option;
+        }
+        else {
+            return ShowLoadData();
         }
     }
 
@@ -319,14 +352,14 @@ class Program
 }
 
     static void SaveCharacterData(Character character, int saveslot) {
-        string save_path = $"saveslot_{saveslot}.txt";
+        string save_path = $"./saves/saveslot_{saveslot}.txt";
 
         // write data to text file
         using (StreamWriter writer = new StreamWriter(save_path, append: false))
         {
             writer.WriteLine(character.Name);
             writer.WriteLine(character.EquipedWeapon.GetName());
-            writer.WriteLine(character.Atk);
+            writer.WriteLine(character.Atk - character.EquipedWeapon.Atk);
             writer.WriteLine(character.Def);
             writer.WriteLine(character.SkillPoints);
         }
@@ -334,7 +367,45 @@ class Program
         // success message
         Console.WriteLine("Save Complete.");
     }
+
+    static Character LoadCharacterData(string SaveFilePath) {    
+        
+        string[] characterData = File.ReadAllLines(SaveFilePath);
+        string charName = characterData[0];
+        string weaponName = characterData[1];
+        int charAtk = int.Parse(characterData[2]);
+        int charDef = int.Parse(characterData[3]);
+        int charSP = int.Parse(characterData[4]);
+
+        // rebuild character
+        Character character = new Character(charName, 100, charAtk, charDef, charSP);
+
+        // re-equip equiped weapon
+        List<Weapon> Weapons = GetWeapons();
+        foreach (var Weapon in Weapons) {
+            if (Weapon.GetName() == weaponName) {
+                int weaponIndx = Weapons.IndexOf(Weapon);
+                character.EquipWeapon(Weapons[weaponIndx]);
+            }
+        }
+
+        return character;
+    }
+
+    static void StartGameMenu() {
+        // clear UI
+        Console.Clear();
+
+        //
+        string MainMenuUI =
+        """
+        1- Level Select
+        2- Inventory
+        """;
+    }
 }
+
+
 
 // generic classes
 class Stats {
