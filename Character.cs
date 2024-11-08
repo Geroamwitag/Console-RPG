@@ -5,15 +5,17 @@ namespace RPGGame {
     public class Character : Living {
 
         // Character specific properties
-        public Inventory CharacterInventory { get; set; }
-        public Weapon EquipedWeapon { get; set; }
-        private Weapon Barefists = new Weapon("Barefists", "pure masculin fists", "Common", 0);
+        public Inventory CharacterInventory         { get; set; }
+        public int SkillPoints                      { get; set; }
+        public Weapon EquipedWeapon                 { get; set; }
+        private Weapon Barefists =                  new Weapon("Barefists", "pure masculin fists", "Common", 0);
 
 
         // Character constructor, inherited from Living
-        public Character(string name, int health, int atk, int def) : base(name, health, atk, def) {
+        public Character(string name, int health, int atk, int def, int skillpoints) : base(name, health, atk, def) {
             CharacterInventory = new Inventory();
             EquipedWeapon = Barefists;
+            SkillPoints = skillpoints;
         }
 
         // Character specific Methods

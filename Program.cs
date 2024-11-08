@@ -1,6 +1,7 @@
 ﻿using RPGGame;
 using System;
 using System.Diagnostics;
+using System.Reflection.Metadata.Ecma335;
 using System.Runtime.InteropServices;
 
 class Program
@@ -25,7 +26,7 @@ class Program
             // gui print
             Console.Clear();
             Console.WriteLine("=== Very Cool RPG Game ===");
-            Console.WriteLine("1. Start New Game");
+            Console.WriteLine("1. New Game");
             Console.WriteLine("2. Load Game");
             Console.WriteLine("3. Options");
             Console.WriteLine("4. Exit");
@@ -62,7 +63,8 @@ class Program
             // start new game
             case 1:
                 Character player = CreateCharacter();
-                Console.WriteLine($"{player.Name}: I am {player.Name} I have {player.Atk} atk and {player.Def}");
+                Console.Clear();
+                DisplayCharacterStats(player);
                 break;
 
             // load saved game 
@@ -102,16 +104,91 @@ class Program
         Stats CharStats = AllocateStats(availableStatPoints);
         int Atk =  CharStats.Atk;
         int Def = CharStats.Def;
-    
+        int SP = CharStats.SkillPoints;
 
-        Character player = new Character(CharName, baseHealth, Atk, Def);
+        // create player
+        Character player = new Character(CharName, baseHealth, Atk, Def, SP);
+
+        // starting equipment
+        Weapon startingWeapon = StartingWeapon();
+
+        // equpi starting equipment
+        player.EquipWeapon(startingWeapon);
 
         return player;
+    }
+
+    static void DisplayCharacterStats(Character character) {
+        Console.WriteLine(
+                    $"""
+                    --
+                    | Character stats:                                    
+                    --
+                    | player name:    {character.Name}                    
+                    | equiped weapon: {character.EquipedWeapon.GetName()} 
+                    | Atk:            {character.Atk}                     
+                    | Def:            {character.Def}                     
+                    | SP:             {character.SkillPoints}
+                    --             
+                    """
+                );
+    }
+
+    static Weapon StartingWeapon() {
+        Console.Clear();
+        // starting weapon options and data
+        List<string> weapons = new List<string> {
+            "Barefists", 
+            "Short Sword", 
+            "Great Sword"
+            };
+        List<string> weaponsDescriptions = new List<string> {
+            "Pure masculin fists",
+            "A basic short sword",
+            "A basic great sword"
+        };
+        List<int> weaponAtks = new List<int> {
+            0,
+            5,
+            10
+        };
+
+        Console.WriteLine(
+            $"""
+            === Starting equpiment ===
+            1- Barefists  :  Pure masculin fists, Atk = 0
+            2- Short Sword:  A basic short sword, Atk = 5
+            3- Great Sword:  A basic great sword, Atk = 10
+            """
+        );
+        
+        // select a weapon
+        Console.Write("Select a starting weapon: ");
+        string? option = Console.ReadLine();
+        bool intbool = CheckIntInput(option, 3, 1);
+
+        if (intbool) {
+            int intOption = Convert.ToInt32(option);
+            int weaponIDNX = intOption - 1;
+            Weapon startingWeapon = new Weapon(weapons[weaponIDNX], weaponsDescriptions[weaponIDNX], "Common", weaponAtks[weaponIDNX]);
+            Console.Clear();
+            Console.WriteLine($"Starting weapon selected: {startingWeapon.GetName()}\npress Enter to continue");
+            Console.ReadKey();
+            Console.Clear();
+            return startingWeapon;
+        }
+        Console.Clear();
+        return StartingWeapon();
+
+        
     }
 
     static Stats AllocateStats(int availableStatPoints) {
         //reset gui
         Console.Clear();
+
+        // initial availableStats
+        int initialAvailableStats = availableStatPoints;
 
         // predefine stats
         int intAtkAllocation = 0;
@@ -128,17 +205,18 @@ class Program
 
             // check input
             try {
-                intAtkAllocation = Convert.ToInt32(stringAtk);
+                int attackToAllocate = Convert.ToInt32(stringAtk);
+                intAtkAllocation += attackToAllocate;
 
                 // less than 10 more than 0 allocation
-                if (intAtkAllocation > 10 || intAtkAllocation < 0 || intAtkAllocation > availableStatPoints) {
+                if (intAtkAllocation > 10 || intAtkAllocation < 0 || intAtkAllocation > initialAvailableStats) {
                     Console.WriteLine("points must be between 0 and 10, and available");
                     Console.ReadKey(); // Pause to show the error
                     continue;
                 }
                 
                 // remove allocated stats from available stats
-                availableStatPoints -= intAtkAllocation;
+                availableStatPoints -= attackToAllocate;
                 
             // reloop if input is not a number    
             }
@@ -148,13 +226,23 @@ class Program
                 continue;
             }
 
-
-            Console.Write($"Finish Atk allocation {intAtkAllocation} Def points?");
+            Console.Clear();
+            Console.Write($"Finish Atk allocation {intAtkAllocation} Atk points? (yes/no) ");
             string? finish = Console.ReadLine();
             if (finish == "yes" || finish == "YES" || finish == "Yes") {
+                Console.Clear();
                 break;
             }
+            else {
+                if (intAtkAllocation == 10) {
+                return AllocateStats(initialAvailableStats);
+                }
+                continue;
+            }
         }
+
+        // clear console when switching to def allocation
+        Console.Clear();
 
         // allocate def points
         while(availableStatPoints > 0) {
@@ -167,7 +255,8 @@ class Program
 
             // check input
             try {
-                intDefAllocation = Convert.ToInt32(stringDef);
+                int defToAllocate = Convert.ToInt32(stringDef);
+                intDefAllocation += defToAllocate;
 
                 // less than 10 more than 0 allocation
                 if (intDefAllocation > 10 || intDefAllocation < 0 || intDefAllocation > availableStatPoints) {
@@ -177,7 +266,7 @@ class Program
                 }
                 
                 // remove def points
-                availableStatPoints -= intDefAllocation;
+                availableStatPoints -= defToAllocate;
                 
             }
             catch (FormatException) {
@@ -188,16 +277,38 @@ class Program
             
             }
 
-            Console.Write($"Finish Def allocation {intDefAllocation} Def points? ");
+            Console.Write($"Finish Def allocation {intDefAllocation} Def points? (yes/no) ");
             string? finish = Console.ReadLine();
             if (finish == "yes" || finish == "YES" || finish == "Yes") {
                 break;
             }
+            else {
+                if (intDefAllocation == 10) {
+                return AllocateStats(initialAvailableStats);
+                }
+                continue;
+            }
     }
-        
+
     Console.Clear();
-    return new Stats { Atk = intAtkAllocation, Def = intDefAllocation};
+    Console.WriteLine($"Stats allocated: Atk = {intAtkAllocation} Def = {intDefAllocation} SP left = {availableStatPoints}\npress Enter to continue");
+    Console.ReadKey(); // Pause to show the message
+    Console.Clear();
+    return new Stats { Atk = intAtkAllocation, Def = intDefAllocation, SkillPoints = availableStatPoints };
     
+    }
+
+    static bool CheckIntInput(string input, int max, int min) {
+        try {
+            int intinput = Convert.ToInt32(input);
+            if (intinput >= min && intinput <= max) {
+                return true;
+            }
+            return false;
+        }
+        catch (FormatException) {
+            return false;
+        }
     }
 }
 
@@ -205,4 +316,5 @@ class Program
 class Stats {
     public int Atk { get; set; }
     public int Def { get; set; }
+    public int SkillPoints {get; set; }
 }
