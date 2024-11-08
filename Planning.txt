@@ -27,3 +27,28 @@
 
 5- game end
     - game data is saved and the loop is closed
+
+
+Git commands:
+
+initialize: git init
+
+remote add repo: git remote add origin https://github.com/username/repo-name.git
+
+add all files in directory to repo: git add .
+
+commit: git commit -m "Initial commit"
+
+if empty repo, create main branch:
+git branch -M main
+git push -u origin main
+
+
+Git commands after making changes:
+
+git add .
+
+git commit -m "Description of the changes made"
+
+git push
+
