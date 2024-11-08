@@ -1,0 +1,29 @@
+1- game start
+    - create character
+        - name
+        - starting stats
+        - starting equipment
+
+1.5- put the player in the main menu
+    - the player can select a level
+    - the player can check their inventory
+    
+2- level select
+    - the player can pick from a list of levels
+        - each level is different in difficulty
+        - each level is a simple turn based 'battle'
+        - when a level is beat it will be marked as beaten
+
+3- loot gain
+    - the player will gain rewards from beating the level
+        - rewards include:
+            . weapons
+            . money
+            . items
+            . exp
+
+4- gameloop
+    - the player can then choose to keep playing or end the game
+
+5- game end
+    - game data is saved and the loop is closed
