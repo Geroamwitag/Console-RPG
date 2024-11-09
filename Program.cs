@@ -8,14 +8,17 @@ class Program
     static void Main(string[] args) {
 
         // start game
+        RunGame();
+
+
+        
+        
+    }
+
+    static void RunGame() {
+        // run the game
         int Option = ShowMainMenu();
-
-
         Run(Option);
-
-        // testing
-        
-        
     }
     
     // generic functions
@@ -149,8 +152,7 @@ class Program
             Console.ReadKey();
             Console.Clear();
             // rerun game
-            int Option = ShowMainMenu();
-            Run(Option);
+            RunGame();
             return 0;
         }
 
