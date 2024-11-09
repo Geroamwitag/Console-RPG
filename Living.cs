@@ -27,6 +27,11 @@ namespace RPGGame {
         public void Attack(Living enemy) {
             int damage = DamageCalculation(this, enemy);
             enemy.Health -= damage;
+            if (enemy.Health <= 0) {
+                enemy.Health = 0;
+            }
+            Console.WriteLine($"Damage dealt {damage} , {enemy.Name} has {enemy.Health} health remaining");
+            Console.ReadKey();
         }
 
 
@@ -38,7 +43,7 @@ namespace RPGGame {
             if (Damage < 0) {
                 Damage = 0;
             }
-
+            
             return Damage;
         }
 

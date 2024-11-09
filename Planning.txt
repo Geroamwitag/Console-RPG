@@ -1,8 +1,9 @@
-1- game start
+1- game start (done)
     - create character
         - name
         - starting stats
         - starting equipment
+    - save character data possible
 
 1.5- put the player in the main menu
     - the player can select a level
@@ -27,6 +28,8 @@
 
 5- game end
     - game data is saved and the loop is closed
+
+6- optimize
 
 
 Git commands:

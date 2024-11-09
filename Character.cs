@@ -5,6 +5,7 @@ namespace RPGGame {
     public class Character : Living {
 
         // Character specific properties
+        public int SaveSlot                         { get; set; }
         public Inventory CharacterInventory         { get; set; }
         public int SkillPoints                      { get; set; }
         public int ExpPoints                        { get; set; }
@@ -18,6 +19,7 @@ namespace RPGGame {
             EquipedWeapon = Barefists;
             SkillPoints = skillpoints;
             ExpPoints = 0;
+            SaveSlot = 0;
         }
 
         // Character specific Methods

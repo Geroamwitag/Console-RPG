@@ -1,5 +1,6 @@
 ﻿using RPGGame;
 using System;
+using System.Diagnostics.Tracing;
 using System.IO;
 
 class Program
@@ -13,13 +14,7 @@ class Program
         Run(Option);
 
         // testing
-        // Console.Clear();
-        // ShowLoadData();
-        // List<Weapon> all_weapons = GetWeapons(); 
-        // Character testChar = LoadCharacterData("./saves/saveslot_0.txt");
-        // testChar.EquipWeapon(all_weapons[0]);
         
-        // SaveCharacterData(testChar, 0);
         
     }
     
@@ -69,17 +64,61 @@ class Program
             case 1:
                 Character player = CreateCharacter();
                 Console.Clear();
-                DisplayCharacterStats(player);
+                
+                // go onto start game menu to start the game
+                int StartGameOption = StartGameMenu();
+
+                // conditions
+                bool LevelSelectCondition = (StartGameOption == 1);
+                bool InventoryCondition = (StartGameOption == 2);
+                if (LevelSelectCondition) {
+                    int SelectedLevel = LevelSelect();
+
+
+                    // start level here
+                    RunBanditLevel(player);
+                    SaveCharacterData(player, player.SaveSlot);
+                }
+                
+                if (InventoryCondition) {
+
+                    // show inventory here
+                    Console.Clear();
+                    Console.WriteLine($"proceeding to Inventory");
+                }
+
+                
                 break;
 
             // load saved game 
             case 2:
                 int saveSlot = ShowLoadData();
-                Character character = LoadCharacterData($"./saves/saveslot_{saveSlot}.txt");
+                Character savedPlayer = LoadCharacterData($"./saves/saveslot_{saveSlot}.txt");
                 Console.Clear();
-                DisplayCharacterStats(character);
+                
+                // go onto main menu to start the game
+                int StartGameOptionTWO = StartGameMenu();
+
+                // conditions
+                bool LevelSelectConditionTWO = (StartGameOptionTWO == 1);
+                bool InventoryConditionTWO = (StartGameOptionTWO == 2);
+                if (LevelSelectConditionTWO) {
+                    int SelectedLevel = LevelSelect();
+
+
+                    // start level here
+                    RunBanditLevel(savedPlayer);
+                    // auto save char data
+                    SaveCharacterData(savedPlayer, savedPlayer.SaveSlot);
+                }
+                
+                if (InventoryConditionTWO) {
+                    Console.Clear();
+                    Console.WriteLine($"proceeding to Inventory");
+                }
+
+                
                 break;
-            
             // open options menu
             case 3:
                 Console.WriteLine("You chose option 3");
@@ -104,6 +143,17 @@ class Program
         string saveDirectory = "saves"; // Change this to your actual save directory path
         string[] saveFiles = Directory.GetFiles(saveDirectory, "*.txt");
 
+        // if no saves 
+        if (saveFiles.Length == 0) {
+            Console.WriteLine("No save data found");
+            Console.ReadKey();
+            Console.Clear();
+            // rerun game
+            int Option = ShowMainMenu();
+            Run(Option);
+            return 0;
+        }
+
         // displays all availabe save files
         for (int i = 0; i < saveFiles.Length; i++) {
             string filePath = saveFiles[i];
@@ -114,7 +164,7 @@ class Program
 
         // has the player select a file number
         Console.Write($"Select a save to load: ");
-        string strinput = Console.ReadLine();
+        string? strinput = Console.ReadLine();
         bool intable = CheckIntInput(strinput, saveFiles.Length-1, 0);
         if (intable) {
             int option = int.Parse(strinput);
@@ -150,10 +200,33 @@ class Program
         List<Weapon> WeaponList = GetWeapons();
         Weapon startingWeapon = StartingWeapon(WeaponList);
 
-        // equpi starting equipment
+        // equip starting equipment
         player.EquipWeapon(startingWeapon);
 
+        // save character?
+        RequestSave(player);
         return player;
+    }
+
+    static void RequestSave(Character character) {
+        Console.Clear();
+        Console.Write("Save char? (y/n) ");
+        string? option = Console.ReadLine();
+        switch (option) {
+            case "y":
+                SaveCharacterData(character, character.SaveSlot);
+                break;
+            case "n":
+                Console.WriteLine("Data not saved");
+                Console.ReadKey();
+                break;
+            default:
+                Console.Clear();
+                Console.WriteLine("input a valid option.");
+                Console.ReadKey();
+                RequestSave(character);
+                break;
+        }
     }
 
     static void DisplayCharacterStats(Character character) {
@@ -302,6 +375,12 @@ class Program
     
     // weapon methods
    static List<Weapon> GetWeapons() {
+        /*
+        0 -> weak weapon
+        1 -> average weapon
+        2 -> strong weapon
+        */
+
         // define weapon objects
         Weapon BareFists = new Weapon("Bare Fists", "Pure masculin fists", "common", 0);
         Weapon ShotSword = new Weapon("Short Sword", "A basic short sword", "common", 5);
@@ -315,6 +394,29 @@ class Program
             };
 
         return weaponList;
+        
+   }
+
+   static List<Enemy> GetBanditEnemies() {
+        /*
+        0 -> reg enemy
+        1 -> mini boss enemy
+        2 -> boss enemy
+        */
+
+        // define enemy objects
+        Enemy bandit = new Enemy("Bandit",20, 2, 2);
+        Enemy banditCaptian = new Enemy("Bandit Captian",50,10,5);
+        Enemy banditLeader = new Enemy("Bandit Leader",70,12,7);
+
+        // add weapon objects to weapon list
+        List<Enemy> banditEnemyList = new List<Enemy> {
+            bandit,
+            banditCaptian,
+            banditLeader
+            };
+
+        return banditEnemyList;
         
    }
 
@@ -354,6 +456,9 @@ class Program
     static void SaveCharacterData(Character character, int saveslot) {
         string save_path = $"./saves/saveslot_{saveslot}.txt";
 
+        // asign save slot to character
+        character.SaveSlot = saveslot;
+
         // write data to text file
         using (StreamWriter writer = new StreamWriter(save_path, append: false))
         {
@@ -362,10 +467,14 @@ class Program
             writer.WriteLine(character.Atk - character.EquipedWeapon.Atk);
             writer.WriteLine(character.Def);
             writer.WriteLine(character.SkillPoints);
+            writer.WriteLine(character.ExpPoints);
+            writer.WriteLine(character.SaveSlot);
         }
 
         // success message
-        Console.WriteLine("Save Complete.");
+        Console.WriteLine("Data Saved");
+        Console.ReadKey();
+        Console.Clear();
     }
 
     static Character LoadCharacterData(string SaveFilePath) {    
@@ -376,9 +485,14 @@ class Program
         int charAtk = int.Parse(characterData[2]);
         int charDef = int.Parse(characterData[3]);
         int charSP = int.Parse(characterData[4]);
+        int charExp = int.Parse(characterData[5]);
+        int charSaveSlot = int.Parse(characterData[6]);
 
         // rebuild character
         Character character = new Character(charName, 100, charAtk, charDef, charSP);
+
+        // add exp
+        character.ExpPoints += charExp;
 
         // re-equip equiped weapon
         List<Weapon> Weapons = GetWeapons();
@@ -392,16 +506,89 @@ class Program
         return character;
     }
 
-    static void StartGameMenu() {
-        // clear UI
-        Console.Clear();
+    static int StartGameMenu() {
+        while (true) {
+                // clear UI
+            Console.Clear();
 
-        //
-        string MainMenuUI =
-        """
-        1- Level Select
-        2- Inventory
-        """;
+            // Ui's
+            string MainMenuUI =
+            """ 
+            ===
+            Main Menu
+            1- Level Select
+            2- Inventory
+            ===
+            """;
+            
+
+            // display main menu
+            Console.WriteLine(MainMenuUI);
+            Console.Write("select an option: ");
+            string? mainOption = Console.ReadLine();
+            bool validMainOption = CheckIntInput(mainOption, 2, 1);
+
+            if (validMainOption) {
+                int intOption = int.Parse(mainOption);
+
+                switch (intOption) {
+                    case 1:
+                        // return level select option
+                        return 1;
+                        
+                    case 2:
+                        // Inventory
+                        return 2;
+
+                    default:
+                        // error message
+                        Console.Clear();
+                        Console.WriteLine("Something went wrong");
+                        return StartGameMenu();
+                        
+                    
+                }
+            }
+        }
+        
+
+    }
+
+    static int LevelSelect() {
+        Console.Clear();
+        string LevelSelectUi = 
+            """
+            ==
+            Level Select
+            1 - Level 1, Bandit Camp
+            ==
+            """;
+        
+        // display UI an request option
+        while (true) {
+            Console.Clear();
+            Console.WriteLine(LevelSelectUi);
+            Console.Write("select a level: ");
+            string? levelOption = Console.ReadLine();
+            bool validLevelOption = CheckIntInput(levelOption, 2, 1);
+
+            if (validLevelOption) {
+                int selectedLevel = int.Parse(levelOption);
+                Console.Clear();
+                return selectedLevel;
+            }
+            else {
+                Console.WriteLine("Please select a valid option");
+                Console.ReadKey();
+            }
+        }
+        
+    }
+
+    static void RunBanditLevel(Character player) {
+        List<Enemy> BanditEnemies = GetBanditEnemies();
+        Level BanditLevel = new Level(10, BanditEnemies[0], BanditEnemies[1], BanditEnemies[2]);
+        BanditLevel.StartBattle(player, BanditEnemies[0]);
     }
 }
 
