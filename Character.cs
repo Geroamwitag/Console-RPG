@@ -24,8 +24,12 @@ namespace RPGGame {
 
         // Character specific Methods
         public void EquipWeapon(Weapon weapon) {
-            EquipedWeapon = weapon;
-            this.Atk += weapon.Atk;
+
+        }
+
+        public void UnEquipWeapon(Weapon weapon) {
+            EquipedWeapon = Barefists;
+            this.Atk -= weapon.Atk;
         }
 
         public void UnEquipWeapon(Weapon weapon) {

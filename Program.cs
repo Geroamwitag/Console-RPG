@@ -383,7 +383,7 @@ class Program
             """
             ==
             Level Select
-            1 - Level 1, Bandit Camp
+            1- Level 1, Bandit Camp
             ==
             """;
         
