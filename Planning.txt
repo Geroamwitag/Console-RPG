@@ -1,13 +1,14 @@
 1- game start (done)
-    - create character
+    - create character (done)
         - name
         - starting stats
         - starting equipment
-    - save character data possible
+    - save character data possible (done)
+    - put player in main menu (done)
 
-1.5- put the player in the main menu
-    - the player can select a level
-    - the player can check their inventory
+1.5- put the player in the game menu
+    - the player can select a level (done)
+    - the player can check their inventory 
     
 2- level select
     - the player can pick from a list of levels

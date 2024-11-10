@@ -30,28 +30,16 @@ class Program
                 Console.Clear();
                 
                 // go onto start game menu to start the game
-                int StartGameOption = StartGameMenu();
+                while (true) {
+                    int StartGameOption = StartGameMenu();
 
-                // conditions
-                bool LevelSelectCondition = (StartGameOption == 1);
-                bool InventoryCondition = (StartGameOption == 2);
-                if (LevelSelectCondition) {
-                    int SelectedLevel = LevelSelect();
+                    View_Inventory_or_Select_Level(StartGameOption, player);
 
-
-                    // start level here
-                    RunBanditLevel(player);
-                    SaveCharacterData(player, player.SaveSlot);
-                }
-                
-                if (InventoryCondition) {
-
-                    // show inventory here
-                    Console.Clear();
-                    Console.WriteLine($"proceeding to Inventory");
-                }
-
-                
+                    // if level select was selected
+                    if (StartGameOption == 1) {
+                        break;
+                    }
+                };
                 break;
 
             // load saved game 
@@ -61,27 +49,17 @@ class Program
                 Console.Clear();
                 
                 // go onto main menu to start the game
-                int StartGameOptionTWO = StartGameMenu();
+                while (true) {
+                    int StartGameOptionTWO = StartGameMenu();
 
-                // conditions
-                bool LevelSelectConditionTWO = (StartGameOptionTWO == 1);
-                bool InventoryConditionTWO = (StartGameOptionTWO == 2);
-                if (LevelSelectConditionTWO) {
-                    int SelectedLevel = LevelSelect();
+                    View_Inventory_or_Select_Level(StartGameOptionTWO, savedPlayer);
 
+                    // if level select was selected
+                    if (StartGameOptionTWO == 3) {
+                        break;
+                    }
+                };
 
-                    // start level here
-                    RunBanditLevel(savedPlayer);
-                    // auto save char data
-                    SaveCharacterData(savedPlayer, savedPlayer.SaveSlot);
-                }
-                
-                if (InventoryConditionTWO) {
-                    Console.Clear();
-                    Console.WriteLine($"proceeding to Inventory");
-                }
-
-                
                 break;
             // open options menu
             case 3:
@@ -102,6 +80,37 @@ class Program
 
 
     // Generic functions
+    static void View_Inventory_or_Select_Level(int option, Character character) {
+        // conditions
+        bool levelOption = (option == 1);
+        bool InventoryOption = (option == 2);
+
+        if (levelOption) {
+            int SelectedLevel = LevelSelect();
+            // start level here
+            RunBanditLevel(character);
+            // auto save char data
+            SaveCharacterData(character, character.SaveSlot);
+        }
+        
+        if (InventoryOption) {
+            Console.Clear();
+            character.CharacterInventory.Show();
+            Console.ReadKey();
+        }
+    }
+
+
+    static int SelectSaveSlot() {
+        // get savefiles
+        string saveDirectory = "saves";
+        string[] saveFiles = Directory.GetFiles(saveDirectory, "*.txt");
+
+        // selected save file will be the length of the available save slots
+        int saveSlot = saveFiles.Count();
+        return saveSlot;
+    }
+
     static void SaveCharacterData(Character character, int saveslot) {
         string save_path = $"./saves/saveslot_{saveslot}.txt";
 
@@ -148,6 +157,28 @@ class Program
         }
     }
 
+    static void CharacterCreator_SaveRequest(Character character) {
+        Console.Clear();
+        Console.Write("Save char? (y/n) ");
+        string? option = Console.ReadLine();
+        switch (option) {
+            case "y":
+                int saveSlot = SelectSaveSlot();
+                SaveCharacterData(character, saveSlot);
+                break;
+            case "n":
+                Console.WriteLine("Data not saved");
+                Console.ReadKey();
+            break;
+            default:
+                Console.Clear();
+                Console.WriteLine("input a valid option.");
+                Console.ReadKey();
+                CharacterCreator_SaveRequest(character);
+        break;
+        }
+    }
+
 
     static Character LoadCharacterData(string SaveFilePath) {    
         string[] characterData = File.ReadAllLines(SaveFilePath);
@@ -171,6 +202,7 @@ class Program
             if (Weapon.GetName() == weaponName) {
                 int weaponIndx = Weapons.IndexOf(Weapon);
                 character.EquipWeapon(Weapons[weaponIndx]);
+                character.CharacterInventory.AddItem(Weapons[weaponIndx]);
             }
         }
 
@@ -252,7 +284,7 @@ class Program
 
     static int StartGameMenu() {
         while (true) {
-                // clear UI
+            // clear UI
             Console.Clear();
 
             // Ui's
@@ -262,6 +294,7 @@ class Program
             Game Menu
             1- Level Select
             2- Inventory
+            3- Return to main menu
             ===
             """;
             
@@ -270,7 +303,7 @@ class Program
             Console.WriteLine(GameMenuUI);
             Console.Write("select an option: ");
             string? GameMenuOption = Console.ReadLine();
-            bool validMainOption = CheckIntInput(GameMenuOption, 2, 1);
+            bool validMainOption = CheckIntInput(GameMenuOption, 3, 1);
 
             if (validMainOption) {
                 int intOption = int.Parse(GameMenuOption);
@@ -283,6 +316,11 @@ class Program
                     case 2:
                         // Inventory
                         return 2;
+
+                    case 3:
+                        // return to main menu
+                        RunGame();
+                        break;
 
                     default:
                         // error message
@@ -304,7 +342,7 @@ class Program
         Console.Clear();
 
         // get savefiles
-        string saveDirectory = "saves"; // Change this to your actual save directory path
+        string saveDirectory = "saves";
         string[] saveFiles = Directory.GetFiles(saveDirectory, "*.txt");
 
         // if no saves 
@@ -371,6 +409,13 @@ class Program
     }
 
 
+    static void ShowInventory(Character character) {
+        Console.Clear();
+        Inventory charInventory = character.CharacterInventory;
+        charInventory.Show();
+        Console.Clear();
+    }
+
 
     // Character creator functions
     static Character CreateCharacter() {
@@ -400,9 +445,10 @@ class Program
 
         // equip starting equipment
         player.EquipWeapon(startingWeapon);
+        player.CharacterInventory.AddItem(startingWeapon);
 
         // save character?
-        RequestSave(player);
+        CharacterCreator_SaveRequest(player);
         return player;
     }
 

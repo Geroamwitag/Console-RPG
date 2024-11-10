@@ -29,7 +29,12 @@ namespace RPGGame
         public void Show() {
 
             foreach (var item in items) {
-            Console.WriteLine($"{item.Key} x{item.Value}");
+                Console.WriteLine($"{item.Key} x{item.Value}");
+            }
+
+            // if empty display emptry messaged
+            if (items.Count() == 0) {
+                Console.WriteLine("Inventory is empty");
             }
 
         }
