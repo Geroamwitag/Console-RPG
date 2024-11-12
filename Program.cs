@@ -2,6 +2,8 @@
 using System;
 using System.Diagnostics.Tracing;
 using System.IO;
+using System.Security;
+using System.Security.Cryptography.X509Certificates;
 
 class Program
 {
@@ -15,92 +17,56 @@ class Program
 
     // Main functions
     static void RunGame() {
-        // run the game
-        int Option = ShowMainMenu();
-        Run(Option);
+
+        // start at main menu screen
+        DrawMainMenuGUI();
+        MainMenuOptionSelect();
+        
     }
 
 
-    static void Run(int choice) {
-        switch (choice)
-        {   
-            // start new game
-            case 1:
-                Character player = CreateCharacter();
+    public static void MainMenuOptionSelect() {
+        Console.Write("Select an option: ");
+        string? MainMenuOption = Console.ReadLine();
+
+        switch (MainMenuOption) {
+            case "1":
+                Console.Clear();
+                CreateCharacter();
+                break;
+
+            // main starting point
+            case "2":
+
+                // load character data
+                Console.Clear();
+                int LoadDataOption = LoadData();
+                Character player = LoadCharacterData($"./saves/saveslot_{LoadDataOption}.txt");
                 Console.Clear();
                 
-                // go onto start game menu to start the game
-                while (true) {
-                    int StartGameOption = StartGameMenu();
-
-                    View_Inventory_or_Select_Level(StartGameOption, player);
-
-                    // if level select was selected
-                    if (StartGameOption == 1) {
-                        break;
-                    }
-                };
+                // game loop
+                DrawGameMenuUI();
+                GameMenuOptionSelect(player);
                 break;
 
-            // load saved game 
-            case 2:
-                int saveSlot = ShowLoadData();
-                Character savedPlayer = LoadCharacterData($"./saves/saveslot_{saveSlot}.txt");
+
+            case "3":
                 Console.Clear();
-                
-                // go onto main menu to start the game
-                while (true) {
-                    int StartGameOptionTWO = StartGameMenu();
-
-                    View_Inventory_or_Select_Level(StartGameOptionTWO, savedPlayer);
-
-                    // if level select was selected
-                    if (StartGameOptionTWO == 3) {
-                        break;
-                    }
-                };
-
-                break;
-            // open options menu
-            case 3:
-                Console.WriteLine("You chose option 3");
-                break;
-
-            // close game
-            case 4:
                 Environment.Exit(0);
                 break;
-
             default:
-                Console.WriteLine("Invalid choice");
+
+                // redraw ui with error message
+                Console.Clear();
+                DrawMainMenuGUI();
+                Console.WriteLine("Please Select a valid option");
+                MainMenuOptionSelect();
                 break;
         }
     }
-
 
 
     // Generic functions
-    static void View_Inventory_or_Select_Level(int option, Character character) {
-        // conditions
-        bool levelOption = (option == 1);
-        bool InventoryOption = (option == 2);
-
-        if (levelOption) {
-            int SelectedLevel = LevelSelect();
-            // start level here
-            RunBanditLevel(character);
-            // auto save char data
-            SaveCharacterData(character, character.SaveSlot);
-        }
-        
-        if (InventoryOption) {
-            Console.Clear();
-            character.CharacterInventory.Show();
-            Console.ReadKey();
-        }
-    }
-
-
     static int SelectSaveSlot() {
         // get savefiles
         string saveDirectory = "saves";
@@ -110,6 +76,7 @@ class Program
         int saveSlot = saveFiles.Count();
         return saveSlot;
     }
+
 
     static void SaveCharacterData(Character character, int saveslot) {
         string save_path = $"./saves/saveslot_{saveslot}.txt";
@@ -137,7 +104,6 @@ class Program
 
 
     static void RequestSave(Character character) {
-        Console.Clear();
         Console.Write("Save char? (y/n) ");
         string? option = Console.ReadLine();
         switch (option) {
@@ -151,13 +117,15 @@ class Program
             default:
                 Console.Clear();
                 Console.WriteLine("input a valid option.");
-                Console.ReadKey();
                 RequestSave(character);
                 break;
         }
     }
 
+
     static void CharacterCreator_SaveRequest(Character character) {
+        
+        // character save for new character
         Console.Clear();
         Console.Write("Save char? (y/n) ");
         string? option = Console.ReadLine();
@@ -165,6 +133,10 @@ class Program
             case "y":
                 int saveSlot = SelectSaveSlot();
                 SaveCharacterData(character, saveSlot);
+                Console.Clear();
+                Console.WriteLine("Go to load game to start");
+                Console.ReadKey();
+                RunGame();
                 break;
             case "n":
                 Console.WriteLine("Data not saved");
@@ -224,7 +196,7 @@ class Program
     }
 
 
-    static void DisplayCharacterStats(Character character) {
+    public static void DisplayCharacterStats(Character character) {
         Console.WriteLine(
                     $"""
                     --
@@ -243,47 +215,20 @@ class Program
 
 
     // UI functions
-    static int ShowMainMenu()
-    {
-        while (true) {
-
-            // gui print
-            Console.Clear();
-            Console.WriteLine("=== Very Cool RPG Game ===");
-            Console.WriteLine("1. New Game");
-            Console.WriteLine("2. Load Game");
-            Console.WriteLine("3. Options");
-            Console.WriteLine("4. Exit");
-            Console.WriteLine("=====================");
-
-            // user input
-            Console.Write("Choose an option: ");
-            string? userInnput = Console.ReadLine();
-
-            // input check
-            try {
-                int intInput = Convert.ToInt32(userInnput);
-
-                List<int> ValidOptions = new List<int> {1, 2, 3, 4};
-                if (ValidOptions.Contains(intInput)) {
-                    return intInput;
-                }
-                else {
-                    Console.WriteLine("Please choose a valid option");
-                    return ShowMainMenu();
-                }
-            }
-            catch (FormatException) {
-                return ShowMainMenu();
-            };
-
-        }
-        
+    public static void DrawMainMenuGUI() {
+        string MainMenuUI =
+        $"""
+        === Main Menu ===
+        1- Create Character
+        2- Load Game
+        3- Exit
+        """;
+        Console.Clear();
+        Console.WriteLine(MainMenuUI);
     }
 
 
-    static int StartGameMenu() {
-        while (true) {
+    public static void DrawGameMenuUI() {
             // clear UI
             Console.Clear();
 
@@ -297,47 +242,93 @@ class Program
             3- Return to main menu
             ===
             """;
-            
-
-            // display main menu
             Console.WriteLine(GameMenuUI);
+    }
+    
+    public static void  GameMenuOptionSelect(Character character) {
             Console.Write("select an option: ");
             string? GameMenuOption = Console.ReadLine();
-            bool validMainOption = CheckIntInput(GameMenuOption, 3, 1);
 
-            if (validMainOption) {
-                int intOption = int.Parse(GameMenuOption);
-
-                switch (intOption) {
-                    case 1:
-                        // return level select option
-                        return 1;
-                        
-                    case 2:
-                        // Inventory
-                        return 2;
-
-                    case 3:
-                        // return to main menu
-                        RunGame();
-                        break;
-
-                    default:
-                        // error message
-                        Console.Clear();
-                        Console.WriteLine("Something went wrong");
-                        return StartGameMenu();
-                        
+            switch (GameMenuOption) {
+                case "1":
+                    Console.Clear();
+                    DrawLevelSelect();
+                    LevelSelectOptionSelect(character);
+                    break;
                     
+                case "2":
+                    // Inventory
+                    Console.Clear();
+                    ShowInventory(character);
+
+
+                    // return to game menu
+                    Console.Clear();
+                    DrawGameMenuUI();
+                    GameMenuOptionSelect(character);
+                    break;
+
+                case "3":
+                    // return to main menu
+                    RunGame();
+                    break;
+
+                default:
+                    // error message
+                    Console.Clear();
+                    DrawGameMenuUI();
+                    Console.WriteLine("Input a valid option");
+                    GameMenuOptionSelect(character);
+                    break;
+                        
                 }
             }
-        }
-        
 
+    public static void DrawLevelSelect() {
+        string LevelSelectUI = 
+        """
+        === Level Select ===
+        1- Bandit Camp
+        """;
+        Console.WriteLine(LevelSelectUI);
     }
 
+    public static void LevelSelectOptionSelect(Character character) {
+        Console.Write("Select a level: ");
+        string? LevelSelectOption = Console.ReadLine();
 
-    static int ShowLoadData() {
+        switch (LevelSelectOption) {
+
+            // bandit camp
+            case "1":
+                Console.Clear();
+
+                // replace with actual bandit camp
+                RunBanditLevel(character);
+
+                // save data
+                Console.Clear();
+                RequestSave(character);
+
+                // loop back to game menu
+                DrawGameMenuUI();
+                GameMenuOptionSelect(character);
+
+                break;
+
+            // add more cases for more options
+
+            default:
+                Console.Clear();
+                DrawLevelSelect();
+                Console.WriteLine("Input a valid option");
+                LevelSelectOptionSelect(character);
+                break;
+        }
+    }
+        
+
+    public static int LoadData() {
         // clear ui
         Console.Clear();
 
@@ -352,7 +343,6 @@ class Program
             Console.Clear();
             // rerun game
             RunGame();
-            return 0;
         }
 
         // displays all availabe save files
@@ -372,40 +362,8 @@ class Program
             return option;
         }
         else {
-            return ShowLoadData();
+            return LoadData();
         }
-    }
-
-
-    static int LevelSelect() {
-        Console.Clear();
-        string LevelSelectUi = 
-            """
-            ==
-            Level Select
-            1- Level 1, Bandit Camp
-            ==
-            """;
-        
-        // display UI an request option
-        while (true) {
-            Console.Clear();
-            Console.WriteLine(LevelSelectUi);
-            Console.Write("select a level: ");
-            string? levelOption = Console.ReadLine();
-            bool validLevelOption = CheckIntInput(levelOption, 2, 1);
-
-            if (validLevelOption) {
-                int selectedLevel = int.Parse(levelOption);
-                Console.Clear();
-                return selectedLevel;
-            }
-            else {
-                Console.WriteLine("Please select a valid option");
-                Console.ReadKey();
-            }
-        }
-        
     }
 
 
@@ -413,12 +371,13 @@ class Program
         Console.Clear();
         Inventory charInventory = character.CharacterInventory;
         charInventory.Show();
+        Console.ReadKey();
         Console.Clear();
     }
 
 
     // Character creator functions
-    static Character CreateCharacter() {
+    public static void CreateCharacter() {
         Console.Clear();
         Console.WriteLine("=== Create Your Character ===");
 
@@ -449,7 +408,6 @@ class Program
 
         // save character?
         CharacterCreator_SaveRequest(player);
-        return player;
     }
 
 
@@ -605,7 +563,7 @@ class Program
 
 
     // Generation functions
-    static void RunBanditLevel(Character player) {
+    public static void RunBanditLevel(Character player) {
         List<Enemy> BanditEnemies = GetBanditEnemies();
         Level BanditLevel = new Level(10, BanditEnemies[0], BanditEnemies[1], BanditEnemies[2]);
         BanditLevel.StartBattle(player, BanditEnemies[0]);
