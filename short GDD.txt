@@ -1,0 +1,51 @@
+OVERVIEW
+
+Title:
+Console RPG Project
+
+Genre:
+Turn Based RPG
+
+Platform:
+PC Console
+
+Goal:
+C# and Game DEV practice
+
+
+CONCEPT
+
+Core gameplay:
+The player will create a character to take into levels of various difficulty and multiple enemies. The player can strategically
+battle these enemies with their variety of attack options, using skills and varying wepaons.
+
+The player will do this to build his characters level to become strong enough to take on more challenging levels, since doing this will
+allow the player to unlock new attacks and weapons and increase their stats.
+
+The objective is to beat the final level and unlock and endless mode (no mandatory since this is mainly for practice)
+
+
+MECHANICS
+
+- turn based combat
+- leveling and progression
+- inventory system
+- strategy mechanics, abusing enemy weaknesses using special kinds of attacks
+
+
+LEVEL DESIGN
+
+The player will enter a level and first encounter an easy basic enemy, then encounter a mini boss enemy, then finally encounter
+the boss enemy, defeating this boss enemy will beat the level. Each enemy rewards exp even if the level is not completed.
+
+
+USP
+
+for now there is no usp, its is a plain turn based rpg soley created for my practice
+
+
+CONTROLS
+
+purely numpad inputs
+
+

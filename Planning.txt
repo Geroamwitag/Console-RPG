@@ -1,41 +1,22 @@
-1- game start (done)
-    - create character (done)
-        - name
-        - starting stats
-        - starting equipment
-    - save character data possible (done)
-    - put player in main menu (done)
+1- create a proper level system
+    - before a level the player can edit their attacks using attacks from their attacks inventory
+    - before a battle begins, the console will hint at the enemies weaknesses
+    - during the players turn in the level, the player can select from a list of attacks which will have varying effects
+    - after an enemy is defeated the level will follow onto the next enemy after rewarding exp for defeating the prior enemy
+    - when the boss is defeated the level will be marked as completed and the player will be rewarded with:
+        - exp
+        - item drops
+        - may learn a new type of attack
+    - save the characters data before exiting the level
 
-1.5- put the player in the game menu
-    - the player can select a level (done)
-    - the player can check their inventory (done)
-
-2- proper gameplay
-    - the game play of the level is not static
-    - it is turn based and has some sort of depth to it
-    - its fun and rewarding
-    
-3- level select
-    - the player can pick from a list of levels
-        - each level is different in difficulty
-        - each level is a simple turn based 'battle'
-        - when a level is beat it will be marked as beaten
-
-4- loot gain
-    - the player will gain rewards from beating the level
-        - rewards include:
-            . weapons
-            . money
-            . items
-            . exp
-
-5- gameloop
-    - the player can then choose to keep playing or end the game
-
-6- game end
-    - game data is saved and the loop is closed
-
-7- optimize
+2- create a proper leveling system
+    - the character will be given a level property
+    - this level will increase after the exp property reaches a certian property
+    - leveling up will require more exp as the player levels, perhaps by multiplying a required exp to level property for the character
+    - the player will be rewarded 1 sp per level which can be allocated to a stat
+    - the player may be rewarded new attacks
+ 
+3- create a variety of weapons and attacks (optional since this is just practice)
 
 
 Git commands:

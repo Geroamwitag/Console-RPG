@@ -34,9 +34,13 @@ namespace RPGGame {
                 // player turn
                 Console.Clear();
                 Console.WriteLine($"{character.Name}'s turn");
+
+                // add skill select
                 Console.WriteLine("Press any key to attack");
                 Console.ReadKey();
                 character.Attack(enemy);
+
+
                 // check if won
                 if (enemy.Health <= 0) {
                     Console.WriteLine("You win");
