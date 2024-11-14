@@ -28,6 +28,8 @@ class Program
 
 
 
+
+
     // Main Menu Functions
     public static void MainMenuOptionSelect() {
         Console.Write("Select an option: ");
@@ -311,49 +313,6 @@ class Program
 
 
     // Load Game Menu Functions
-    static Character LoadCharacterData(string SaveFilePath) {    
-        string[] characterData = File.ReadAllLines(SaveFilePath);
-        
-        string charName = characterData[0];
-        string weaponName = characterData[1];
-        int charAtk = int.Parse(characterData[2]);
-        int charDef = int.Parse(characterData[3]);
-        int charSP = int.Parse(characterData[4]);
-        int charExp = int.Parse(characterData[5]);
-        int charSaveSlot = int.Parse(characterData[6]);
-
-        // read attack slot stringed list and parse to list
-        List<Attack> attackSlots = characterData[7]
-            .Split(',', StringSplitOptions.RemoveEmptyEntries)
-            .Select(slot => {
-                var parts = slot.Split('|');
-                return new Attack(parts[0], parts[1]); // parts[0]: AttackName, parts[1]: AttackType
-            })
-            .ToList();
-
-        // Rebuild character
-        Character character = new Character(charName, 100, charAtk, charDef, charSP) {
-            SaveSlot = charSaveSlot,
-            AttackSlots = attackSlots
-        };
-
-        // Add exp
-        character.ExpPoints += charExp;
-
-        // Re-equip equipped weapon
-        List<Weapon> Weapons = GetWeapons();
-        foreach (var Weapon in Weapons) {
-            if (Weapon.GetName() == weaponName) {
-                character.EquipWeapon(Weapon);
-                character.CharacterInventory.AddItem(Weapon);
-                break; // Stop after finding and equipping the weapon
-            }
-        }
-
-        return character;
-    }
-
-
     public static int DrawLoadDataUI() {
         // clear ui
         Console.Clear();
@@ -374,7 +333,7 @@ class Program
         // displays all availabe save files
         for (int i = 0; i < saveFiles.Length; i++) {
             string filePath = saveFiles[i];
-            string playerName = File.ReadLines(filePath).First(); // Reads the first line of the file
+            string playerName = File.ReadLines(filePath).First().Split(":")[1]; // Reads the first line of the file
 
             Console.WriteLine($"({i}) {playerName}");
         }
@@ -515,14 +474,19 @@ class Program
     // Inventory and Character Stats Functions
     static void ShowInventory(Character character) {
         Console.Clear();
+        Console.WriteLine("Inventory: ");
         Inventory charInventory = character.CharacterInventory;
         charInventory.Show();
+        Console.WriteLine();
+        Console.WriteLine("Stats: ");
+        DisplayCharacterStats(character);
+        Console.WriteLine("Press any key to return to game menu");
         Console.ReadKey();
         Console.Clear();
     }
 
 
-        public static void DisplayCharacterStats(Character character) {
+    public static void DisplayCharacterStats(Character character) {
         Console.WriteLine(
                     $"""
                     --
@@ -533,6 +497,7 @@ class Program
                     | Atk:            {character.Atk}                     
                     | Def:            {character.Def}                     
                     | SP:             {character.SkillPoints}
+                    | EXP:            {character.ExpPoints}
                     --             
                     """
                 );
@@ -723,15 +688,16 @@ class Program
         */
 
         // define enemy objects
-        Enemy bandit = new Enemy("Bandit",20, 2, 2);
-        Enemy banditCaptian = new Enemy("Bandit Captian",50,10,5);
-        Enemy banditLeader = new Enemy("Bandit Leader",70,12,7);
+        // name, health, atk, def, expdrop
+        Enemy RegEnemy = new Enemy("Bandit",20, 2, 2, 10);
+        Enemy MiniBoss = new Enemy("Bandit Captian",50,10,5, 30);
+        Enemy Boss = new Enemy("Bandit Leader",70,12,7, 50);
 
         // add weapon objects to weapon list
         List<Enemy> banditEnemyList = new List<Enemy> {
-            bandit,
-            banditCaptian,
-            banditLeader
+            RegEnemy,
+            MiniBoss,
+            Boss
             };
 
         return banditEnemyList;
@@ -764,7 +730,7 @@ class Program
 
 
 
-    // Save Functions
+    // Load and Save Functions
     static void SaveCharacterData(Character character, int saveslot) {
         string save_path = $"./saves/saveslot_{saveslot}.txt";
 
@@ -774,14 +740,16 @@ class Program
         // write data to text file
         using (StreamWriter writer = new StreamWriter(save_path, append: false))
         {
-            writer.WriteLine(character.Name);
-            writer.WriteLine(character.EquipedWeapon.GetName());
-            writer.WriteLine(character.Atk - character.EquipedWeapon.Atk);
-            writer.WriteLine(character.Def);
-            writer.WriteLine(character.SkillPoints);
-            writer.WriteLine(character.ExpPoints);
-            writer.WriteLine(character.SaveSlot);
-            
+            writer.WriteLine($"Caracter name:{character.Name}");
+            writer.WriteLine($"Equipped Weapon:{character.EquipedWeapon.GetName()}");
+            writer.WriteLine($"Attack Power:{character.Atk - character.EquipedWeapon.Atk}");
+            writer.WriteLine($"Defense:{character.Def}");
+            writer.WriteLine($"Skill Points:{character.SkillPoints}");
+            writer.WriteLine($"Experience Points:{character.ExpPoints}");
+            writer.WriteLine($"Save Slot:{character.SaveSlot}");
+
+            writer.WriteLine();
+            writer.WriteLine("Equiped Attacks:");
             // save attack slots, needs to be formatted first
             string attackSlotsLine = string.Join(",", character.AttackSlots.Select(a => $"{a.AttackName}|{a.AttackType}"));
             writer.WriteLine(attackSlotsLine);
@@ -791,6 +759,50 @@ class Program
         Console.WriteLine("Data Saved");
         Console.ReadKey();
         Console.Clear();
+    }
+
+
+    static Character LoadCharacterData(string SaveFilePath) {    
+        string[] characterData = File.ReadAllLines(SaveFilePath);
+        
+        // split readings by the : and read the values
+        string charName = characterData[0].Split(":")[1];
+        string weaponName = characterData[1].Split(":")[1];
+        int charAtk = int.Parse(characterData[2].Split(":")[1]);
+        int charDef = int.Parse(characterData[3].Split(":")[1]);
+        int charSP = int.Parse(characterData[4].Split(":")[1]);
+        int charExp = int.Parse(characterData[5].Split(":")[1]);
+        int charSaveSlot = int.Parse(characterData[6].Split(":")[1]);
+
+        // read attack slot stringed list and parse to list
+        List<Attack> attackSlots = characterData[9]
+            .Split(',', StringSplitOptions.RemoveEmptyEntries)
+            .Select(slot => {
+                var parts = slot.Split('|');
+                return new Attack(parts[0], parts[1]); // parts[0]: AttackName, parts[1]: AttackType
+            })
+            .ToList();
+
+        // Rebuild character
+        Character character = new Character(charName, 100, charAtk, charDef, charSP) {
+            SaveSlot = charSaveSlot,
+            AttackSlots = attackSlots
+        };
+
+        // Add exp
+        character.ExpPoints += charExp;
+
+        // Re-equip equipped weapon
+        List<Weapon> Weapons = GetWeapons();
+        foreach (var Weapon in Weapons) {
+            if (Weapon.GetName() == weaponName) {
+                character.EquipWeapon(Weapon);
+                character.CharacterInventory.AddItem(Weapon);
+                break; // Stop after finding and equipping the weapon
+            }
+        }
+
+        return character;
     }
 
 
@@ -834,11 +846,34 @@ class Program
     // Run Level Functions
     public static void RunBanditLevel(Character player) {
         List<Enemy> BanditEnemies = GetBanditEnemies();
-        Level BanditLevel = new Level(10, BanditEnemies[0], BanditEnemies[1], BanditEnemies[2]);
+        Level BanditLevel = new Level(100, BanditEnemies[0], BanditEnemies[1], BanditEnemies[2]);
+
+        // current character exp
+        int currentCharEXP = player.ExpPoints;
+
+        // bandit basic enemy
         BanditLevel.StartBattle(player, BanditEnemies[0]);
+
+        // if char gained exp, exit battle was not selected
+        if (currentCharEXP < player.ExpPoints) {
+            // redefine current char exp and continue level
+            currentCharEXP = player.ExpPoints;
+
+            // bandit miniboss enemy
+            BanditLevel.StartBattle(player, BanditEnemies[1]);
+
+            if (currentCharEXP < player.ExpPoints) {
+                // bandit boss
+                BanditLevel.StartBattle(player, BanditEnemies[2]);
+            }
+
+        }
+
     }
 
 }
+
+
 
 
 // generic classes

@@ -1,13 +1,13 @@
 1- create a proper level system
-    - before a level the player can edit their attacks using attacks from their attacks inventory
+    - before a level the player can edit their attacks using attacks from their attacks inventory (done)
     - before a battle begins, the console will hint at the enemies weaknesses
-    - during the players turn in the level, the player can select from a list of attacks which will have varying effects
-    - after an enemy is defeated the level will follow onto the next enemy after rewarding exp for defeating the prior enemy
+    - during the players turn in the level, the player can select from a list of attacks which will have varying effects 
+    - after an enemy is defeated the level will follow onto the next enemy after rewarding exp for defeating the prior enemy (done)
     - when the boss is defeated the level will be marked as completed and the player will be rewarded with:
         - exp
         - item drops
         - may learn a new type of attack
-    - save the characters data before exiting the level
+    - save the characters data before exiting the level (done)
 
 2- create a proper leveling system
     - the character will be given a level property
@@ -18,6 +18,10 @@
  
 3- create a variety of weapons and attacks (optional since this is just practice)
 
+
+current tasks:
+- make attacks special
+- make enemies have weaknesses
 
 Git commands:
 

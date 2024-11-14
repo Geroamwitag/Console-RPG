@@ -1,8 +1,10 @@
-Geroam
-Great Sword
-10
-0
-0
-30
-0
+Caracter name:Geroam
+Equipped Weapon:Great Sword
+Attack Power:1000
+Defense:0
+Skill Points:0
+Experience Points:90
+Save Slot:0
+
+Equiped Attacks:
 Weapon Slash|Slash

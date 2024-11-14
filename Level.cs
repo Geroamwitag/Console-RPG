@@ -7,7 +7,6 @@ namespace RPGGame {
         public Enemy MiniBossEnemy  { get; set; }
         public Enemy BossEnemy      { get; set; }
         
-
         // constructor
         public Level(int expDrop, Enemy regularEnemy, Enemy miniBossEnemy, Enemy bossEnemy ) {
             ExpDrop = expDrop;
@@ -24,19 +23,27 @@ namespace RPGGame {
                 {character.Name} encounterd {enemy.Name}
                 and the battle commenced.
 
-                Press Enter to Continue
+                Press Enter to start battle
                 """
             );
             Console.ReadKey();
 
             // battle loop
-            while (true) {
+            bool battleActive = true;
+            while (battleActive) {
                 // player turn
                 Console.Clear();
                 Console.WriteLine($"{character.Name}'s turn");
 
                 // add skill select
-                Console.WriteLine("Press any key to attack");
+                DrawAttacks(character);
+                Attack attack = SelectAttack(character);
+                // if e was selected, exit the battle
+                if (attack == null) {
+                    ExitBattle();
+                    break;
+                }
+                Console.WriteLine($"You used {attack.AttackName}!");
                 Console.ReadKey();
                 character.Attack(enemy);
 
@@ -45,13 +52,15 @@ namespace RPGGame {
                 if (enemy.Health <= 0) {
                     Console.WriteLine("You win");
                     Console.ReadKey();
-                    EndBattle(character);
+                    EndBattle(character, enemy);
                     break;
                 }
                
                 // enemy turn
                 Console.Clear();
                 Console.WriteLine($"{enemy.Name}'s turn");
+                Console.ReadKey();
+                Console.WriteLine($"{enemy.Name} Attacks!");
                 Console.ReadKey();
                 enemy.Attack(character);
                 // check if loss
@@ -61,19 +70,85 @@ namespace RPGGame {
                     break;
                 }
             }
+
         }
         
 
-        public void EndBattle(Character character) {
+        public void DrawAttacks(Character character) {
+            List<Attack> Attacks = character.AttackSlots;
+            Console.WriteLine("Attack!!");
+            Console.WriteLine("_-_-");
+            for (int i = 0; i < Attacks.Count; i++) {
+                Console.WriteLine($"| ({i+1}) {Attacks[i].AttackName} ({Attacks[i].AttackType})");
+            }
+            if (character.AttackSlots.Count == 0) {
+                Console.WriteLine("You have no attacks equiped!");
+            }
+            Console.WriteLine($"| (e) Exit battle ");
+            Console.WriteLine("_--__");
+        }
+
+
+        public Attack SelectAttack(Character character) {
+            Console.Write("");
+            string AttackOption = Console.ReadLine();
+
+            // if no attacks equpied
+            if (character.AttackSlots.Count == 0) {
+                return null;
+            }
+            
+            // if 1 attack equiped
+            if (AttackOption == "1" && character.AttackSlots.Count >= 1) {
+                return character.AttackSlots[0];
+            }
+
+            // if 2 attacks equiped
+            if (AttackOption == "2" && character.AttackSlots.Count >= 2) {
+                return character.AttackSlots[1];
+            }   
+            // if 3 attacks equiped
+            if (AttackOption == "3" && character.AttackSlots.Count >= 3) {
+                return character.AttackSlots[2];
+            }
+            // if e, endbattle
+            if (AttackOption == "e") {
+                return null;
+            }
+
+
+            // if invalid input
             Console.Clear();
-            DropExp(character);
-            Console.WriteLine($"You got {ExpDrop} Exp");
+            Console.WriteLine($"{character.Name}'s turn");
+            DrawAttacks(character);
+            Console.WriteLine("Invalid input");
+            return SelectAttack(character);
+        }
+
+
+        public void EndBattle(Character character, Enemy enemy) {
+            Console.Clear();
+            DropExp(character, enemy.ExpDrop);
+            Console.WriteLine($"You got {enemy.ExpDrop} Exp");
             Console.ReadKey();
             Console.Clear();
         }
 
 
-        private void DropExp(Character character) {
+        public void ExitBattle() {
+            Console.Clear();
+            Console.WriteLine($"You escaped");
+            Console.ReadKey();
+            Console.Clear();
+        }
+
+
+        private void DropExp(Character character, int Exp) {
+            character.ExpPoints += Exp;
+        }
+
+
+        public void DropLevelExp(Character character) {
             character.ExpPoints += ExpDrop;
         }
     }
