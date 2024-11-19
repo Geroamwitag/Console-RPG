@@ -380,7 +380,8 @@ class Program
             1- Level Select
             2- Inventory
             3- Edit Attacks
-            4- Return to main menu
+            4- Allocate stats
+            5- Return to main menu
             ===
             """;
             Console.WriteLine(GameMenuUI);
@@ -421,10 +422,17 @@ class Program
                     break;
 
                 case "4":
+                    Console.Clear();
+                    DrawAllocateStatsUI(character);
+                    AllocateStatOptions(character);
+
+                    DrawGameMenuUI();
+                    GameMenuOptionSelect(character);
+                    break;
+                case "5":
                     // return to main menu
                     RunGame();
                     break;
-
                 default:
                     // error message
                     Console.Clear();
@@ -500,6 +508,7 @@ class Program
     }
 
 
+
     public static void DisplayCharacterStats(Character character) {
         Console.WriteLine(
                     $"""
@@ -518,6 +527,75 @@ class Program
                     """
                 );
     }
+
+
+
+    public static void DrawAllocateStatsUI(Character character) {
+        string AllocateStatsUI =
+        $"""
+        -----------------------------------------------
+        | Skill points available: {character.SkillPoints}
+        | 
+        | input to allocate:
+        | 1- Atk            current Atk: {character.Atk}
+        | 2- Def            current Def: {character.Def}
+        |
+        | input 'e' to exit 
+        -----------------------------------------------
+        """;
+        Console.WriteLine(AllocateStatsUI);
+    }
+
+
+
+    public static void AllocateStatOptions(Character character) {
+        Console.Write("");
+        string? option = Console.ReadLine();
+        switch (option) {
+            case "1":
+                if (character.SkillPoints < 1) {
+                    Console.Clear();
+                    DrawAllocateStatsUI(character);
+                    Console.WriteLine("Insufficient skill points");
+                    break; // continue the loop
+                }
+                character.Atk += 1;
+                character.SkillPoints -= 1;
+                Console.Clear();
+                DrawAllocateStatsUI(character);
+                AllocateStatOptions(character);
+                break;
+            case "2":
+                if (character.SkillPoints < 1) {
+                    Console.Clear();
+                    DrawAllocateStatsUI(character);
+                    Console.WriteLine("Insufficient skill points");
+                    break; // continue the loop
+                }
+                character.Def += 1;
+                character.SkillPoints -= 1;
+                Console.Clear();
+                DrawAllocateStatsUI(character);
+                AllocateStatOptions(character);
+                break;
+            case "e":
+                Console.Clear();
+                RequestSave(character);
+                DrawGameMenuUI();
+                GameMenuOptionSelect(character);
+                break;
+            default:
+                Console.Clear();
+                Console.WriteLine("Invalid input");
+                DrawAllocateStatsUI(character);
+                AllocateStatOptions(character);
+                break;
+        }
+
+        // Optionally redraw the UI after every valid input
+        DrawAllocateStatsUI(character);   
+    }
+
 
 
 
