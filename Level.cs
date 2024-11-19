@@ -128,8 +128,8 @@ namespace RPGGame {
 
         public void EndBattle(Character character, Enemy enemy) {
             Console.Clear();
-            DropExp(character, enemy.ExpDrop);
             Console.WriteLine($"You got {enemy.ExpDrop} Exp");
+            DropExp(character, enemy.ExpDrop);
             Console.ReadKey();
             Console.Clear();
         }
@@ -147,9 +147,5 @@ namespace RPGGame {
             character.ExpPoints += Exp;
         }
 
-
-        public void DropLevelExp(Character character) {
-            character.ExpPoints += ExpDrop;
-        }
     }
 }

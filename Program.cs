@@ -105,6 +105,10 @@ class Program
             case "n":
                 Console.WriteLine("Data not saved");
                 Console.ReadKey();
+                Console.Clear();
+                Console.WriteLine("Go to load game to start");
+                Console.ReadKey();
+                RunGame();
             break;
             default:
                 Console.Clear();
@@ -117,12 +121,22 @@ class Program
 
 
     public static void CreateCharacter() {
-        Console.Clear();
-        Console.WriteLine("=== Create Your Character ===");
 
-        // name
-        Console.Write("Character name: ");
-        string? CharName = Console.ReadLine();
+        // char name
+        // cannot contain :, because it will mess around with savefiles and im a lazy programmer
+        string? CharName = null;
+        while (true) {
+            Console.Clear();
+            Console.WriteLine("=== Create Your Character ===");
+            Console.Write("Character name: ");
+            CharName = Console.ReadLine();
+            if (string.IsNullOrEmpty(CharName) || CharName.Contains(':')) {
+                continue;
+            }
+            break;
+        
+            }
+
         
         // base health
         int baseHealth = 100;
@@ -165,9 +179,9 @@ class Program
     // select a weapon
     Console.Write("Select a starting weapon: ");
     string? option = Console.ReadLine();
-    bool intbool = CheckIntInput(option, 3, 1);
+    bool intable = CheckIntInput(option, 3, 1);
 
-    if (intbool) {
+    if (intable) {
         int intOption = Convert.ToInt32(option);
         int weaponIDNX = intOption - 1;
         Weapon startingWeapon = weaponsList[weaponIDNX];
@@ -228,9 +242,9 @@ class Program
             }
 
             Console.Clear();
-            Console.Write($"Finish Atk allocation {intAtkAllocation} Atk points? (yes/no) ");
+            Console.Write($"Finish Atk allocation {intAtkAllocation} Atk points? (y/n) ");
             string? finish = Console.ReadLine();
-            if (finish == "yes" || finish == "YES" || finish == "Yes") {
+            if (finish == "y" || finish == "Y" || finish == "Yes" || finish == "yes") {
                 Console.Clear();
                 break;
             }
@@ -278,9 +292,9 @@ class Program
             
             }
 
-            Console.Write($"Finish Def allocation {intDefAllocation} Def points? (yes/no) ");
+            Console.Write($"Finish Def allocation {intDefAllocation} Def points? (y/n) ");
             string? finish = Console.ReadLine();
-            if (finish == "yes" || finish == "YES" || finish == "Yes") {
+            if (finish == "y" || finish == "Y" || finish == "Yes" || finish == "yes") {
                 break;
             }
             else {
@@ -492,12 +506,14 @@ class Program
                     --
                     | Character stats:                                    
                     --
-                    | player name:    {character.Name}                    
-                    | equiped weapon: {character.EquipedWeapon.GetName()} 
-                    | Atk:            {character.Atk}                     
-                    | Def:            {character.Def}                     
-                    | SP:             {character.SkillPoints}
-                    | EXP:            {character.ExpPoints}
+                    | player name:          {character.Name}                    
+                    | equiped weapon:       {character.EquipedWeapon.GetName()} 
+                    | Atk:                  {character.Atk}                     
+                    | Def:                  {character.Def}                     
+                    | SP:                   {character.SkillPoints}
+                    | EXP:                  {character.ExpPoints}
+                    | Level:                {character.CharLevel}
+                    | EXP until level up:   {character.ExpNeeded}
                     --             
                     """
                 );
@@ -746,6 +762,8 @@ class Program
             writer.WriteLine($"Defense:{character.Def}");
             writer.WriteLine($"Skill Points:{character.SkillPoints}");
             writer.WriteLine($"Experience Points:{character.ExpPoints}");
+            writer.WriteLine($"Character Level:{character.CharLevel}");
+            writer.WriteLine($"Experience Needed:{character.ExpNeeded}");
             writer.WriteLine($"Save Slot:{character.SaveSlot}");
 
             writer.WriteLine();
@@ -772,10 +790,12 @@ class Program
         int charDef = int.Parse(characterData[3].Split(":")[1]);
         int charSP = int.Parse(characterData[4].Split(":")[1]);
         int charExp = int.Parse(characterData[5].Split(":")[1]);
-        int charSaveSlot = int.Parse(characterData[6].Split(":")[1]);
+        int charLevel = int.Parse(characterData[6].Split(":")[1]);
+        int ExpNeeded = int.Parse(characterData[7].Split(":")[1]);
+        int charSaveSlot = int.Parse(characterData[8].Split(":")[1]);
 
         // read attack slot stringed list and parse to list
-        List<Attack> attackSlots = characterData[9]
+        List<Attack> attackSlots = characterData[11]
             .Split(',', StringSplitOptions.RemoveEmptyEntries)
             .Select(slot => {
                 var parts = slot.Split('|');
@@ -786,6 +806,7 @@ class Program
         // Rebuild character
         Character character = new Character(charName, 100, charAtk, charDef, charSP) {
             SaveSlot = charSaveSlot,
+            CharLevel = charLevel,
             AttackSlots = attackSlots
         };
 
@@ -865,7 +886,15 @@ class Program
             if (currentCharEXP < player.ExpPoints) {
                 // bandit boss
                 BanditLevel.StartBattle(player, BanditEnemies[2]);
+
+                    if (currentCharEXP < player.ExpPoints) {
+                        // drop beat level exp
+                        Console.WriteLine($"You beat the bandit level, you got {BanditLevel.ExpDrop} exp");
+                        Console.ReadKey();
+                        player.ExpPoints += BanditLevel.ExpDrop;
+                    }
             }
+
 
         }
 

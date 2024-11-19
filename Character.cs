@@ -1,3 +1,4 @@
+using System.ComponentModel;
 using RPGGame;
 
 namespace RPGGame {
@@ -6,7 +7,13 @@ namespace RPGGame {
 
         // stat properties
         public int SkillPoints                      { get; set; }
-        public int ExpPoints                        { get; set; }
+    
+        public int ExpNeeded                        { get; set; }
+
+        // expneeded growth parameter
+        private double GrowthRate                   { get; set; } = 1.5;
+        private int BaseExpNeeded                   { get; set; } = 50;
+        public int CharLevel                        { get; set; }
 
         // inventory properties
         public Inventory CharacterInventory         { get; set; }
@@ -17,8 +24,18 @@ namespace RPGGame {
 
         // special properties
         public int SaveSlot                         { get; set; }
-        
-        
+        private int _expPoints = 0;
+
+        public int ExpPoints
+        {
+            get { return _expPoints; }
+            set
+            {
+                _expPoints = value;  // Set the backing field
+                CheckForLevelUp();   // Check for level up after updating ExpPoints
+            }
+        }
+
 
         
 
@@ -27,7 +44,8 @@ namespace RPGGame {
             CharacterInventory = new Inventory();
             EquipedWeapon = Barefists;
             SkillPoints = skillpoints;
-            ExpPoints = 0;
+            CharLevel = 0;
+            ExpNeeded = BaseExpNeeded;
             SaveSlot = 0;
             MaxAttackSlots = 3;
             AttackSlots = new List<Attack> {};
@@ -61,8 +79,30 @@ namespace RPGGame {
             AttackSlots.Remove(attack);
             Console.WriteLine($"{attack} unslotted");
         }
-            
-        
+                    
+        private bool isLevelingUp = false;
+
+        private void CheckForLevelUp() {
+            if (ExpPoints >= ExpNeeded) {
+                LevelUp();
+            }
+        }
+
+        public void LevelUp()
+        {
+            CharLevel++;
+            ExpPoints -= ExpNeeded;
+            ExpNeeded = ExpNeededIncrease();
+            SkillPoints += 2;
+            Def += 1;
+            Atk += 1; 
+            Console.WriteLine($"You are now Level {CharLevel}.");
+        }
+
+
+        private int ExpNeededIncrease() {
+            return (int)(BaseExpNeeded * Math.Pow(GrowthRate, CharLevel));
+        }
 
     }
 }
