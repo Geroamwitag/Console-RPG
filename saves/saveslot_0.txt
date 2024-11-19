@@ -1,11 +1,11 @@
 Caracter name:Geroam
 Equipped Weapon:Great Sword
-Attack Power:1008
-Defense:66
-Skill Points:934
-Experience Points:15
-Character Level:3
-Experience Needed:50
+Attack Power:1012
+Defense:70
+Skill Points:942
+Experience Points:173
+Character Level:7
+Experience Needed:854
 Save Slot:0
 
 Equiped Attacks:

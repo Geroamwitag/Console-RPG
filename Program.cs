@@ -508,7 +508,6 @@ class Program
     }
 
 
-
     public static void DisplayCharacterStats(Character character) {
         Console.WriteLine(
                     $"""
@@ -529,7 +528,6 @@ class Program
     }
 
 
-
     public static void DrawAllocateStatsUI(Character character) {
         string AllocateStatsUI =
         $"""
@@ -545,7 +543,6 @@ class Program
         """;
         Console.WriteLine(AllocateStatsUI);
     }
-
 
 
     public static void AllocateStatOptions(Character character) {
@@ -953,19 +950,19 @@ class Program
         // bandit basic enemy
         BanditLevel.StartBattle(player, BanditEnemies[0]);
 
-        // if char gained exp, exit battle was not selected
-        if (currentCharEXP < player.ExpPoints) {
+        // if char exp changed, exit battle was not selected
+        if (currentCharEXP < player.ExpPoints || currentCharEXP > player.ExpPoints) {
             // redefine current char exp and continue level
             currentCharEXP = player.ExpPoints;
 
             // bandit miniboss enemy
             BanditLevel.StartBattle(player, BanditEnemies[1]);
 
-            if (currentCharEXP < player.ExpPoints) {
+            if (currentCharEXP < player.ExpPoints || currentCharEXP > player.ExpPoints) {
                 // bandit boss
                 BanditLevel.StartBattle(player, BanditEnemies[2]);
 
-                    if (currentCharEXP < player.ExpPoints) {
+                    if (currentCharEXP < player.ExpPoints || currentCharEXP > player.ExpPoints) {
                         // drop beat level exp
                         Console.WriteLine($"You beat the bandit level, you got {BanditLevel.ExpDrop} exp");
                         Console.ReadKey();

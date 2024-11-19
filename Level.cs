@@ -126,6 +126,12 @@ namespace RPGGame {
         }
 
 
+        public void AttackEffect(Attack attack) {
+
+        }
+
+
+
         public void EndBattle(Character character, Enemy enemy) {
             Console.Clear();
             Console.WriteLine($"You got {enemy.ExpDrop} Exp");
