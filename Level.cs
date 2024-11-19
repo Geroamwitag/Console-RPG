@@ -153,5 +153,7 @@ namespace RPGGame {
             character.ExpPoints += Exp;
         }
 
+        
+
     }
 }

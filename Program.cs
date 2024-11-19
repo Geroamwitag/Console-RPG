@@ -2,6 +2,7 @@
 using System;
 using System.Diagnostics.Tracing;
 using System.IO;
+using System.Runtime.Serialization;
 using System.Security;
 using System.Security.Cryptography.X509Certificates;
 
@@ -378,7 +379,7 @@ class Program
             ===
             Game Menu
             1- Level Select
-            2- Inventory
+            2- Display Stats
             3- Edit Attacks
             4- Allocate stats
             5- Return to main menu
@@ -552,9 +553,10 @@ class Program
             case "1":
                 if (character.SkillPoints < 1) {
                     Console.Clear();
-                    DrawAllocateStatsUI(character);
                     Console.WriteLine("Insufficient skill points");
-                    break; // continue the loop
+                    DrawAllocateStatsUI(character);
+                    AllocateStatOptions(character);
+                    break;
                 }
                 character.Atk += 1;
                 character.SkillPoints -= 1;
@@ -565,9 +567,10 @@ class Program
             case "2":
                 if (character.SkillPoints < 1) {
                     Console.Clear();
-                    DrawAllocateStatsUI(character);
                     Console.WriteLine("Insufficient skill points");
-                    break; // continue the loop
+                    DrawAllocateStatsUI(character);
+                    AllocateStatOptions(character);
+                    break;
                 }
                 character.Def += 1;
                 character.SkillPoints -= 1;
@@ -653,7 +656,7 @@ class Program
 
 
     public static void EditAttackOption(Character character) {
-        Console.Write("Slot or unslot and attack? (y/n) ");
+        Console.Write("Slot or unslot an attack? (y/n) ");
         string? slotingOption = Console.ReadLine();
         switch (slotingOption) {
             case "y":
@@ -946,28 +949,32 @@ class Program
 
         // current character exp
         int currentCharEXP = player.ExpPoints;
+        int currentCharLVL = player.CharLevel;
 
         // bandit basic enemy
         BanditLevel.StartBattle(player, BanditEnemies[0]);
 
         // if char exp changed, exit battle was not selected
-        if (currentCharEXP < player.ExpPoints || currentCharEXP > player.ExpPoints) {
+        if (currentCharEXP < player.ExpPoints || currentCharLVL < player.CharLevel) {
             // redefine current char exp and continue level
             currentCharEXP = player.ExpPoints;
+            currentCharLVL = player.CharLevel;
 
             // bandit miniboss enemy
             BanditLevel.StartBattle(player, BanditEnemies[1]);
 
-            if (currentCharEXP < player.ExpPoints || currentCharEXP > player.ExpPoints) {
+            if (currentCharEXP < player.ExpPoints || currentCharLVL < player.CharLevel) {
+                currentCharEXP = player.ExpPoints;
+                currentCharLVL = player.CharLevel;
                 // bandit boss
                 BanditLevel.StartBattle(player, BanditEnemies[2]);
 
-                    if (currentCharEXP < player.ExpPoints || currentCharEXP > player.ExpPoints) {
-                        // drop beat level exp
-                        Console.WriteLine($"You beat the bandit level, you got {BanditLevel.ExpDrop} exp");
-                        Console.ReadKey();
-                        player.ExpPoints += BanditLevel.ExpDrop;
-                    }
+                if (currentCharEXP < player.ExpPoints || currentCharLVL < player.CharLevel) {
+                    Console.Clear();
+                    Console.WriteLine($"You beat the bandit level and gained {BanditLevel.ExpDrop} exp");
+                    Console.ReadKey();
+                    player.ExpPoints += BanditLevel.ExpDrop;
+                }
             }
 
 
